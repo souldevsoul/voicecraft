@@ -24,6 +24,12 @@ import {
 } from "react-icons/ri"
 
 export default function Home() {
+  const [isVisible, setIsVisible] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsVisible(true)
+  }, [])
+
   // Features data
   const features = [
     {
@@ -149,52 +155,113 @@ export default function Home() {
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Features</a>
             <a href="#pricing" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Pricing</a>
-            <a href="#stats" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Stats</a>
+            <a href="/about" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">About</a>
+            <a href="/contact" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Contact</a>
           </nav>
-          <Button size="md" className="bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-black font-bold uppercase">
+          <Button
+            size="md"
+            className="bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-black font-bold uppercase"
+            onClick={() => window.location.href = '/dashboard'}
+          >
             Get Started
           </Button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white border-b-8 border-black">
-        <div className="max-w-7xl mx-auto px-6 py-24 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Hero Content */}
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 border-4 border-black">
-                <RiSparklingLine className="w-5 h-5" />
-                <Text variant="body-sm" className="font-bold uppercase tracking-wider">50+ LANGUAGES SUPPORT</Text>
-              </div>
-              <Heading variant="h1" className="text-black uppercase leading-tight">
-                CREATE PROFESSIONAL VOICE CONTENT IN SECONDS
-              </Heading>
-              <Text variant="body-lg" className="text-gray-700 max-w-xl">
-                AI-powered voice synthesis and cloning for creators, businesses, and developers. Generate natural-sounding voices or clone your own voice with just minutes of audio.
-              </Text>
-              <div className="flex flex-wrap gap-4">
-                <Button size="xl" className="gap-3 bg-black text-yellow-400 hover:bg-gray-900 border-4 border-black font-bold uppercase brutalist-shadow">
-                  <RiArrowRightLine className="w-5 h-5" />
-                  Start Free Trial
-                </Button>
-                <Button size="xl" variant="secondary" className="gap-3 bg-white text-black hover:bg-gray-100 border-4 border-black font-bold uppercase">
-                  <RiPlayCircleLine className="w-5 h-5" />
-                  Watch Demo
-                </Button>
-              </div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-white via-yellow-50 to-white border-b-8 border-black min-h-[90vh] flex items-center">
+        {/* Floating Microphone Illustrations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <img
+            src="/images/test-mic-vintage-square-nobg.png"
+            alt=""
+            className={`absolute w-32 md:w-48 top-20 left-[10%] transform transition-all duration-1000 ${isVisible ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+          <img
+            src="/images/mic-modern-condenser-nobg.png"
+            alt=""
+            className={`absolute w-24 md:w-40 top-[15%] right-[15%] transform transition-all duration-1000 delay-200 ${isVisible ? 'opacity-50 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+          <img
+            src="/images/mic-futuristic-cube-nobg.png"
+            alt=""
+            className={`absolute w-36 md:w-56 bottom-[20%] left-[5%] transform transition-all duration-1000 delay-300 ${isVisible ? 'opacity-55 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+          <img
+            src="/images/mic-classic-broadcast-nobg.png"
+            alt=""
+            className={`absolute w-28 md:w-44 bottom-[25%] right-[10%] transform transition-all duration-1000 delay-400 ${isVisible ? 'opacity-45 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+          <img
+            src="/images/mic-hexagonal-geometric-nobg.png"
+            alt=""
+            className={`absolute w-32 md:w-48 top-[40%] left-[8%] transform transition-all duration-1000 delay-500 ${isVisible ? 'opacity-40 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+          <img
+            src="/images/mic-triangular-prism-nobg.png"
+            alt=""
+            className={`absolute w-28 md:w-44 top-[50%] right-[8%] transform transition-all duration-1000 delay-600 ${isVisible ? 'opacity-35 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
+          <div className="text-center space-y-12">
+            {/* Badge */}
+            <div className={`inline-flex items-center gap-3 px-6 py-3 bg-yellow-400 border-4 border-black brutalist-shadow transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+              <RiSparklingLine className="w-6 h-6" />
+              <Text variant="body-sm" className="font-bold uppercase tracking-wider">AI-POWERED VOICE SYNTHESIS</Text>
             </div>
 
-            {/* Hero Image */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-yellow-400 blur-3xl opacity-20" />
-              <div className="relative border-4 border-black brutalist-shadow-yellow">
-                <img
-                  src="/images/microphone-hero-street.jpg"
-                  alt="VoiceCraft AI Voice Synthesis"
-                  className="w-full"
-                />
-              </div>
+            {/* Big Revealing Text */}
+            <div className="space-y-6">
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase leading-none">
+                <span className={`block transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <span className="text-black">YOUR</span>{" "}
+                  <span className="text-yellow-400 [-webkit-text-stroke:3px_black] [text-stroke:3px_black]">VOICE</span>
+                </span>
+                <span className={`block transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <span className="text-black">YOUR</span>{" "}
+                  <span className="text-yellow-400 [-webkit-text-stroke:3px_black] [text-stroke:3px_black]">STYLE</span>
+                </span>
+                <span className={`block transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <span className="text-black">IN</span>{" "}
+                  <span className="text-yellow-400 [-webkit-text-stroke:3px_black] [text-stroke:3px_black]">SECONDS</span>
+                </span>
+              </h1>
+            </div>
+
+            {/* Subtitle */}
+            <div className={`transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <Text variant="body-xl" className="text-gray-900 max-w-3xl mx-auto text-xl md:text-2xl font-medium">
+                Clone voices, generate speech, create content. Professional AI voice synthesis powered by cutting-edge machine learning.
+              </Text>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className={`flex flex-wrap justify-center gap-6 pt-4 transition-all duration-700 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <Button
+                size="xl"
+                className="gap-3 bg-black text-yellow-400 hover:bg-gray-900 border-4 border-black font-bold uppercase brutalist-shadow text-lg px-12 py-8"
+                onClick={() => window.location.href = '/dashboard'}
+              >
+                <RiArrowRightLine className="w-6 h-6" />
+                Start Free Now
+              </Button>
+              <Button
+                size="xl"
+                variant="secondary"
+                className="gap-3 bg-white text-black hover:bg-gray-100 border-4 border-black font-bold uppercase text-lg px-12 py-8"
+                onClick={() => window.location.href = '/demo'}
+              >
+                <RiPlayCircleLine className="w-6 h-6" />
+                Watch Demo
+              </Button>
             </div>
           </div>
         </div>
@@ -395,11 +462,20 @@ export default function Home() {
             Join thousands of creators and businesses using VoiceCraft to create professional voice content in seconds. Start your free trial today—no credit card required.
           </Text>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="xl" className="gap-3 bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-yellow-400 font-bold uppercase brutalist-shadow-yellow">
+            <Button
+              size="xl"
+              className="gap-3 bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-yellow-400 font-bold uppercase brutalist-shadow-yellow"
+              onClick={() => window.location.href = '/dashboard'}
+            >
               <RiArrowRightLine className="w-5 h-5" />
               Start Free Trial
             </Button>
-            <Button size="xl" variant="secondary" className="gap-3 bg-white text-black hover:bg-gray-100 border-4 border-white font-bold uppercase">
+            <Button
+              size="xl"
+              variant="secondary"
+              className="gap-3 bg-white text-black hover:bg-gray-100 border-4 border-white font-bold uppercase"
+              onClick={() => window.location.href = '/contact'}
+            >
               Schedule a Demo
             </Button>
           </div>
