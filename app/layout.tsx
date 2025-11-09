@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { mantineTheme } from '@/lib/mantine-theme';
+import { CookieConsent } from '@/components/marketing/CookieConsent';
 import "./globals.css";
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -41,6 +42,7 @@ export default function RootLayout({
         <MantineProvider theme={mantineTheme} defaultColorScheme="light">
           <Notifications position="top-right" zIndex={1000} />
           {children}
+          <CookieConsent />
         </MantineProvider>
       </body>
     </html>
