@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // Validation schemas
 const ProjectIdSchema = z.string().cuid();
@@ -83,7 +84,7 @@ export async function POST(
     const paymentCredits = Math.ceil(estimatedCost * 100); // Convert dollars to credits
 
     // Use transaction to ensure atomicity
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Pay the expert
       const updatedExpertUser = await tx.user.update({
         where: { id: project.expert!.userId },
