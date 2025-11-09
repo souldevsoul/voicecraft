@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // Validation schemas
 const ProjectIdSchema = z.string().cuid();
@@ -99,7 +100,7 @@ export async function POST(
     }
 
     // Use transaction to ensure atomicity
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Return credits to user
       const updatedUser = await tx.user.update({
         where: { id: project.user.id },
