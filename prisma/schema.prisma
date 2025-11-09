@@ -383,3 +383,17 @@ model CreditLedger {
   @@index([createdAt])
   @@map("credit_ledger")
 }
+
+// Newsletter Subscriber model - tracks email subscriptions
+model NewsletterSubscriber {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  status        String   @default("active") // active, unsubscribed
+  source        String   @default("popup") // popup, footer, landing-page
+  subscribedAt  DateTime @default(now())
+  unsubscribedAt DateTime?
+
+  @@index([email])
+  @@index([status])
+  @@map("newsletter_subscribers")
+}

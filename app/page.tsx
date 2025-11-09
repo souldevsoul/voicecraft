@@ -4,6 +4,7 @@ import * as React from "react"
 import { Button, Heading, Text } from "@/components/ui"
 import { Waveform, AudioPlayer } from "@/components/voicecraft"
 import { Footer } from "@/components/marketing/layout/footer"
+import { NewsletterPopup } from "@/components/marketing/NewsletterPopup"
 import {
   RiSparklingLine,
   RiMicLine,
@@ -117,30 +118,6 @@ export default function Home() {
     },
   ]
 
-  // Stats data
-  const stats = [
-    {
-      value: "2M+",
-      label: "VOICES GENERATED",
-      icon: RiLineChartLine,
-    },
-    {
-      value: "75K+",
-      label: "ACTIVE CREATORS",
-      icon: RiUserLine,
-    },
-    {
-      value: "4.9",
-      label: "AVERAGE RATING",
-      icon: RiStarFill,
-    },
-    {
-      value: "99.9%",
-      label: "UPTIME SLA",
-      icon: RiAwardLine,
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -170,46 +147,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-yellow-50 to-white border-b-8 border-black min-h-[90vh] flex items-center">
-        {/* Floating Microphone Illustrations */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img
-            src="/images/test-mic-vintage-square-nobg.png"
-            alt=""
-            className={`absolute w-32 md:w-48 top-20 left-[10%] transform transition-all duration-1000 ${isVisible ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-          <img
-            src="/images/mic-modern-condenser-nobg.png"
-            alt=""
-            className={`absolute w-24 md:w-40 top-[15%] right-[15%] transform transition-all duration-1000 delay-200 ${isVisible ? 'opacity-50 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-          <img
-            src="/images/mic-futuristic-cube-nobg.png"
-            alt=""
-            className={`absolute w-36 md:w-56 bottom-[20%] left-[5%] transform transition-all duration-1000 delay-300 ${isVisible ? 'opacity-55 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-          <img
-            src="/images/mic-classic-broadcast-nobg.png"
-            alt=""
-            className={`absolute w-28 md:w-44 bottom-[25%] right-[10%] transform transition-all duration-1000 delay-400 ${isVisible ? 'opacity-45 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-          <img
-            src="/images/mic-hexagonal-geometric-nobg.png"
-            alt=""
-            className={`absolute w-32 md:w-48 top-[40%] left-[8%] transform transition-all duration-1000 delay-500 ${isVisible ? 'opacity-40 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-          <img
-            src="/images/mic-triangular-prism-nobg.png"
-            alt=""
-            className={`absolute w-28 md:w-44 top-[50%] right-[8%] transform transition-all duration-1000 delay-600 ${isVisible ? 'opacity-35 translate-y-0' : 'opacity-0 translate-y-10'}`}
-            style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
-          />
-        </div>
-
         <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
           <div className="text-center space-y-12">
             {/* Badge */}
@@ -259,30 +196,54 @@ export default function Home() {
                 className="gap-3 bg-white text-black hover:bg-gray-100 border-4 border-black font-bold uppercase text-lg px-12 py-8"
                 onClick={() => window.location.href = '/demo'}
               >
-                <RiPlayCircleLine className="w-6 h-6" />
-                Watch Demo
+                <RiMic2Fill className="w-6 h-6" />
+                Try Demo
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="stats" className="bg-black py-16 border-b-8 border-yellow-400">
+      {/* Microphone Lineup */}
+      <section className="relative bg-gradient-to-br from-white via-yellow-50 to-white pb-20 -mb-8">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon
-              return (
-                <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-yellow-400 mb-4">
-                    <Icon className="w-6 h-6 text-black" />
-                  </div>
-                  <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2 uppercase">{stat.value}</div>
-                  <div className="text-sm font-bold text-white uppercase tracking-wider">{stat.label}</div>
-                </div>
-              )
-            })}
+          <div className={`flex justify-center items-end gap-4 md:gap-8 lg:gap-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <img
+              src="/images/test-mic-vintage-square-nobg.png"
+              alt="Vintage Square Microphone"
+              className="w-24 md:w-32 lg:w-40 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
+            <img
+              src="/images/mic-modern-condenser-nobg.png"
+              alt="Modern Condenser Microphone"
+              className="w-20 md:w-28 lg:w-36 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
+            <img
+              src="/images/mic-futuristic-cube-nobg.png"
+              alt="Futuristic Cube Microphone"
+              className="w-28 md:w-36 lg:w-44 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
+            <img
+              src="/images/mic-classic-broadcast-nobg.png"
+              alt="Classic Broadcast Microphone"
+              className="w-22 md:w-30 lg:w-38 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
+            <img
+              src="/images/mic-hexagonal-geometric-nobg.png"
+              alt="Hexagonal Geometric Microphone"
+              className="w-24 md:w-32 lg:w-40 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
+            <img
+              src="/images/mic-triangular-prism-nobg.png"
+              alt="Triangular Prism Microphone"
+              className="w-22 md:w-30 lg:w-38 h-auto transition-all duration-300 hover:scale-110"
+              style={{ filter: 'drop-shadow(0 0 40px rgba(250, 204, 21, 0.4))' }}
+            />
           </div>
         </div>
       </section>
@@ -295,7 +256,7 @@ export default function Home() {
               <RiSparklingLine className="w-6 h-6 text-yellow-400" />
               <Text variant="body-sm" className="text-yellow-400 font-bold uppercase tracking-wider">Features</Text>
             </div>
-            <Heading variant="h2" className="mb-4 uppercase">EVERYTHING YOU NEED</Heading>
+            <Heading variant="h2" className="mb-4 uppercase text-4xl md:text-5xl lg:text-6xl">EVERYTHING YOU NEED</Heading>
             <Text variant="body-lg" className="text-gray-600 max-w-3xl mx-auto">
               Powerful features designed for creators, businesses, and developers
             </Text>
@@ -329,45 +290,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo CTA Section */}
-      <section className="py-24 bg-yellow-400 border-y-8 border-black">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Demo Image */}
-            <div className="order-2 md:order-1">
-              <div className="relative border-4 border-black brutalist-shadow">
-                <img
-                  src="/images/ai-assistant-street.jpg"
-                  alt="AI Voice Assistant"
-                  className="w-full"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button className="w-20 h-20 bg-black border-4 border-black flex items-center justify-center hover:scale-110 transition-transform brutalist-shadow-yellow">
-                    <RiPlayCircleLine className="w-10 h-10 text-yellow-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Demo Content */}
-            <div className="order-1 md:order-2 space-y-6">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-black border-4 border-black mb-4">
-                <RiTimerLine className="w-6 h-6 text-yellow-400" />
-                <Text variant="body-sm" className="text-yellow-400 font-bold uppercase tracking-wider">2-Minute Demo</Text>
-              </div>
-              <Heading variant="h2" className="text-black uppercase">SEE VOICECRAFT IN ACTION</Heading>
-              <Text variant="body-lg" className="text-gray-900">
-                Watch how easy it is to generate professional voice content in seconds. No credit card required.
-              </Text>
-              <Button size="xl" className="gap-3 bg-black text-yellow-400 hover:bg-gray-900 border-4 border-black font-bold uppercase brutalist-shadow">
-                <RiPlayCircleLine className="w-5 h-5" />
-                Watch Demo
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="pricing" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
@@ -375,7 +297,7 @@ export default function Home() {
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-yellow-400 border-4 border-black mb-6">
               <Text variant="body-sm" className="text-black font-bold uppercase tracking-wider">Pricing</Text>
             </div>
-            <Heading variant="h2" className="mb-4 uppercase">CHOOSE YOUR PLAN</Heading>
+            <Heading variant="h2" className="mb-4 uppercase text-4xl md:text-5xl lg:text-6xl">CHOOSE YOUR PLAN</Heading>
             <Text variant="body-lg" className="text-gray-600 max-w-3xl mx-auto">
               Start free, upgrade when you need more. All plans include our core features.
             </Text>
@@ -455,7 +377,7 @@ export default function Home() {
             <RiSparklingLine className="w-6 h-6 text-black" />
             <Text variant="body-sm" className="text-black font-bold uppercase tracking-wider">Ready to Start?</Text>
           </div>
-          <Heading variant="h1" className="mb-6 text-yellow-400 uppercase">
+          <Heading variant="h1" className="mb-6 text-yellow-400 uppercase text-5xl md:text-6xl lg:text-7xl">
             TRANSFORM YOUR VOICE CONTENT
           </Heading>
           <Text variant="body-lg" className="text-white mb-12 max-w-2xl mx-auto">
@@ -483,6 +405,9 @@ export default function Home() {
       </section>
 
       <Footer />
+
+      {/* Newsletter Popup */}
+      <NewsletterPopup />
     </div>
   )
 }

@@ -147,6 +147,11 @@ export function Footer() {
                   Delivery Policy
                 </Link>
               </li>
+              <li>
+                <Link href="/cookie-policy" className="text-gray-300 hover:text-yellow-400 transition-colors">
+                  Cookie Policy
+                </Link>
+              </li>
             </ul>
           </div>
 
