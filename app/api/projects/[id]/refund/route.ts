@@ -83,7 +83,7 @@ export async function POST(
       creditsToRefund = Math.ceil(refundAmount * 100);
     } else {
       // Find the reservation transaction and refund that amount
-      const reservation = project.creditLedger.find(entry => entry.amount < 0);
+      const reservation = project.creditLedger.find((entry: { amount: number }) => entry.amount < 0);
       if (reservation) {
         creditsToRefund = Math.abs(reservation.amount);
       } else {
