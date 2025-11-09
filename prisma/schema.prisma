@@ -1,0 +1,385 @@
+// VoiceCraft - AI Voice Synthesis Platform
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  emailVerified DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Credits system
+  credits       Int           @default(0) // User's available credits (1 credit = $0.01)
+
+  // Relations
+  subscriptions Subscription[]
+  voices        Voice[]
+  generations   VoiceGeneration[]
+  usage         UsageLog[]
+  audios        Audio[]
+  projects      Project[]
+  expertProfile ExpertProfile?
+  creditLedger  CreditLedger[]
+
+  @@map("users")
+}
+
+// Voice model - user's uploaded/cloned voices
+model Voice {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  language    String   @default("en-US")
+  accent      String?
+  gender      String?  // male, female, neutral
+  ageGroup    String?  // child, young adult, adult, senior
+  style       String?  // professional, conversational, dramatic, etc.
+
+  // Replicate voice ID from voice cloning
+  voiceId     String?  @unique // Voice ID returned by Replicate
+
+  // Audio sample for cloning
+  sampleAudioUrl String?
+
+  // Model used for cloning
+  model       String?  // minimax-2.6-turbo, kokoro-82m, xtts-v2
+
+  // Voice characteristics
+  isPublic    Boolean  @default(false)
+  isCloned    Boolean  @default(false)
+  isVerified  Boolean  @default(false)
+
+  status      String   @default("active") // active, processing, failed
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  generations VoiceGeneration[]
+  audios      Audio[]
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([voiceId])
+  @@map("voices")
+}
+
+// Voice Generation - tracks voice synthesis jobs
+model VoiceGeneration {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  voiceId         String
+  voice           Voice    @relation(fields: [voiceId], references: [id], onDelete: Cascade)
+
+  // Input
+  text            String   @db.Text
+  language        String   @default("en-US")
+
+  // Output
+  audioUrl        String?
+  duration        Float?   // seconds
+  fileSize        Int?     // bytes
+  format          String   @default("mp3") // mp3, wav, ogg
+
+  // Settings used
+  speed           Float    @default(1.0)
+  pitch           Float    @default(1.0)
+  emotion         String?  // neutral, happy, sad, excited, etc.
+  emphasis        Json?    // word-level emphasis settings
+
+  // Status tracking
+  status          String   @default("pending") // pending, processing, completed, failed
+  errorMessage    String?
+
+  // Cost tracking
+  characterCount  Int
+  cost            Float?   // in credits or dollars
+
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  @@index([userId])
+  @@index([voiceId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("voice_generations")
+}
+
+// Subscription model
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Subscription details
+  plan              String    // free, starter, pro, enterprise
+  status            String    @default("active") // active, cancelled, expired, past_due
+
+  // Billing
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?   @unique
+  stripePriceId         String?
+  stripeCurrentPeriodEnd DateTime?
+
+  // Usage limits
+  monthlyCharacterLimit Int       @default(10000)
+  monthlyVoiceClones    Int       @default(1)
+  allowCustomVoices     Boolean   @default(false)
+  allowCommercialUse    Boolean   @default(false)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  cancelledAt       DateTime?
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+// Usage tracking for rate limiting and analytics
+model UsageLog {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action          String   // generate_voice, clone_voice, download_audio, etc.
+  characterCount  Int?
+  cost            Float?
+
+  metadata        Json?    // flexible field for additional data
+
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("usage_logs")
+}
+
+// Pre-built voice templates (system voices)
+model VoiceTemplate {
+  id          String   @id @default(cuid())
+
+  name        String
+  description String?
+  language    String
+  accent      String?
+  gender      String
+  ageGroup    String
+  style       String
+
+  // Audio sample
+  sampleAudioUrl String
+
+  // Featured on homepage
+  isFeatured  Boolean  @default(false)
+  isPremium   Boolean  @default(false)
+
+  // Usage stats
+  usageCount  Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([language])
+  @@index([isFeatured])
+  @@map("voice_templates")
+}
+
+// Audio model - generated or uploaded audio files
+model Audio {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Audio file details
+  filename       String
+  audioUrl       String   // Vercel Blob URL
+  duration       Float?   // seconds
+  fileSize       Int?     // bytes
+  format         String   @default("mp3") // mp3, wav, ogg
+
+  // Generation details (if generated)
+  voiceId        String?
+  voice          Voice?   @relation(fields: [voiceId], references: [id], onDelete: SetNull)
+  text           String?  @db.Text // Original text if generated
+  metadata       Json?    // Settings used for generation (speed, pitch, emotion, etc.)
+
+  // Upload details (if uploaded)
+  uploadSource   String?  // "upload", "generate", "import"
+
+  // Organization
+  tags           String[] // For categorization
+  description    String?
+
+  // Status
+  status         String   @default("ready") // ready, processing, failed
+
+  // Projects relationship
+  projectAudios  ProjectAudio[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([voiceId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("audios")
+}
+
+// Project model - audio projects for expert assignment
+model Project {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Project details
+  name              String
+  description       String?  @db.Text
+  request           String?  @db.Text  // Detailed user request for estimation
+  status            String   @default("draft")
+  // Status values: draft, estimating, waiting_for_estimate_accept, estimate_accepted,
+  //                waiting_for_assignment, assigned, in_review, completed, cancelled, refunded
+
+  // AI Estimation (from OpenAI)
+  estimatedCost     Float?   // in dollars
+  estimatedDuration Float?   // in hours
+  estimationData    Json?    // Full estimation response from OpenAI
+  actualCost        Float?   // Final actual cost after completion
+
+  // Expert assignment
+  expertId          String?
+  expert            ExpertProfile? @relation(fields: [expertId], references: [id], onDelete: SetNull)
+  instructions      String?  @db.Text
+  deadline          DateTime?
+  assignedAt        DateTime? // When expert was assigned
+
+  // Work submission and review
+  submittedAt       DateTime? // When work was submitted by expert
+  reviewedAt        DateTime? // When user reviewed the work
+  rating            Int?      // User's rating of the work (1-5)
+  feedback          String?   @db.Text // User's feedback on the work
+
+  // Project metadata
+  priority          String   @default("medium") // low, medium, high, urgent
+  tags              String[] // For categorization
+
+  // Audios in this project
+  projectAudios     ProjectAudio[]
+
+  // Credit transactions
+  creditLedger      CreditLedger[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  completedAt       DateTime?
+
+  @@index([userId])
+  @@index([expertId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+// ProjectAudio junction table - many-to-many relationship
+model ProjectAudio {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  audioId    String
+  audio      Audio    @relation(fields: [audioId], references: [id], onDelete: Cascade)
+
+  // Order in project (for sequencing)
+  order      Int      @default(0)
+
+  // Status tracking for this specific audio in the project
+  status     String   @default("pending") // pending, in_progress, completed
+  notes      String?  @db.Text
+
+  createdAt  DateTime @default(now())
+
+  @@unique([projectId, audioId])
+  @@index([projectId])
+  @@index([audioId])
+  @@map("project_audios")
+}
+
+// ExpertProfile model - expert users who can be assigned projects
+model ExpertProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Expert details
+  specialization String[] // voice-over, audio-editing, translation, etc.
+  bio            String?  @db.Text
+  hourlyRate     Float?   // in dollars
+
+  // Availability
+  isAvailable    Boolean  @default(true)
+  timezone       String?
+  workingHours   Json?    // Flexible JSON for working hours
+
+  // Performance metrics
+  rating         Float?   @default(0)
+  completedJobs  Int      @default(0)
+  averageTurnaround Float? // in hours
+
+  // Assigned projects
+  projects       Project[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isAvailable])
+  @@map("expert_profiles")
+}
+
+// CreditLedger model - tracks all credit transactions
+model CreditLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Transaction details
+  amount      Int      // Positive for additions, negative for deductions
+  type        String   // PROJECT_RESERVATION, PROJECT_COMPLETION, PROJECT_REFUND, CREDIT_PURCHASE, etc.
+  description String   @db.Text
+
+  // Related project (if applicable)
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  metadata    Json?    // Additional transaction details
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("credit_ledger")
+}
