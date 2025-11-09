@@ -19,7 +19,7 @@ export default function CookiePolicyPage() {
       />
 
       <section className="py-20">
-        <Container maxWidth="4xl">
+        <Container maxWidth="2xl">
           <div className="prose prose-lg max-w-none">
             <div className="mb-8">
               <div className="inline-flex items-center gap-3 px-6 py-3 bg-yellow-400 border-4 border-black mb-6">

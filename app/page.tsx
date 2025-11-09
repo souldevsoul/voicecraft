@@ -175,7 +175,7 @@ export default function Home() {
 
             {/* Subtitle */}
             <div className={`transition-all duration-700 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <Text variant="body-xl" className="text-gray-900 max-w-3xl mx-auto text-xl md:text-2xl font-medium">
+              <Text variant="lead" className="text-gray-900 max-w-3xl mx-auto text-xl md:text-2xl font-medium">
                 Clone voices, generate speech, create content. Professional AI voice synthesis powered by cutting-edge machine learning.
               </Text>
             </div>
