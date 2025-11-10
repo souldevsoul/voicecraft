@@ -1,7 +1,7 @@
 "use client"
 
 import { Container } from "@/components/ui/container"
-import { Header } from "@/components/marketing/layout/header"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
 import { RiRefundLine, RiTimeLine, RiCheckLine, RiMailLine } from "react-icons/ri"
 
@@ -10,18 +10,7 @@ export default function RefundPolicyPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Header
-        logoText="VoiceCraft"
-        navLinks={[
-          { label: "Features", href: "/features" },
-          { label: "Pricing", href: "/pricing" },
-          { label: "Demo", href: "/demo" },
-        ]}
-        ctaButton={{
-          text: "Get Started",
-          href: "/signup",
-        }}
-      />
+      <Navbar />
 
       {/* Hero */}
       <section className="py-20 border-b-8 border-black">

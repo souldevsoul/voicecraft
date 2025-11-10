@@ -1,5 +1,5 @@
 import { Container } from "@/components/ui/container"
-import { Header } from "@/components/marketing/layout/header"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
 import { VoiceGenerator } from "@/components/voicecraft"
 import { ArrowLeft } from "lucide-react"
@@ -7,19 +7,8 @@ import { ArrowLeft } from "lucide-react"
 export default function DemoPage() {
   return (
     <main className="min-h-screen bg-white">
-      {/* Header */}
-      <Header
-        logoText="VoiceCraft"
-        navLinks={[
-          { label: "Features", href: "/#features" },
-          { label: "Pricing", href: "/#pricing" },
-          { label: "Demo", href: "/demo" },
-        ]}
-        ctaButton={{
-          text: "Get Started",
-          href: "/signup",
-        }}
-      />
+      {/* Navigation */}
+      <Navbar />
 
       {/* Demo Section */}
       <section className="py-20">

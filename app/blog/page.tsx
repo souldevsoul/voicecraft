@@ -1,9 +1,11 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
-import { Header } from "@/components/marketing/layout/header"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
+import Link from "next/link"
 import {
   RiArticleLine,
   RiCalendarLine,
@@ -16,6 +18,7 @@ import {
 } from "react-icons/ri"
 
 export default function BlogPage() {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const categories = [
     { name: "All Posts", slug: "all", count: 24 },
     { name: "Product Updates", slug: "updates", count: 8 },
@@ -24,9 +27,11 @@ export default function BlogPage() {
   ]
 
   const featuredPost = {
+    id: "kokoro-82m-trusted-voice-model",
     title: "Kokoro-82M: Why 56M+ Runs Makes It the Most Trusted Voice Model",
     excerpt: "Deep dive into the world's most popular voice synthesis model and why battle-tested technology matters for production applications.",
     category: "Product Updates",
+    categorySlug: "updates",
     date: "Nov 8, 2025",
     readTime: "8 min read",
     author: "VoiceCraft Team",
@@ -35,81 +40,99 @@ export default function BlogPage() {
 
   const blogPosts = [
     {
+      id: "getting-started-voice-cloning",
       title: "Getting Started with Voice Cloning: A Complete Guide",
       excerpt: "Learn how to create custom voice profiles using Minimax technology. From audio preparation to training optimization.",
       category: "Tutorials",
+      categorySlug: "tutorials",
       date: "Nov 5, 2025",
       readTime: "12 min read",
       author: "Sarah Chen",
       tag: "Beginner",
     },
     {
+      id: "creative-ways-ai-voice-synthesis",
       title: "10 Creative Ways to Use AI Voice Synthesis",
       excerpt: "Discover innovative applications of voice AI: from audiobook narration to podcast production and e-learning content.",
       category: "Use Cases",
+      categorySlug: "use-cases",
       date: "Nov 3, 2025",
       readTime: "6 min read",
       author: "Marcus Johnson",
       tag: "Popular",
     },
     {
+      id: "emotion-control-voice-ai",
       title: "Emotion Control in Voice AI: Technical Deep Dive",
       excerpt: "How emotion parameters work in Minimax models and best practices for natural-sounding emotional delivery.",
       category: "Tutorials",
+      categorySlug: "tutorials",
       date: "Nov 1, 2025",
       readTime: "10 min read",
       author: "Dr. Emily Rodriguez",
       tag: "Technical",
     },
     {
+      id: "comparing-voice-models",
       title: "Comparing Voice Models: Kokoro vs Minimax vs XTTS",
       excerpt: "A comprehensive comparison of the top three voice synthesis models: features, quality, speed, and pricing.",
       category: "Product Updates",
+      categorySlug: "updates",
       date: "Oct 28, 2025",
       readTime: "15 min read",
       author: "VoiceCraft Team",
       tag: "Popular",
     },
     {
+      id: "podcasters-voice-ai-production",
       title: "How Podcasters Are Using Voice AI to Scale Production",
       excerpt: "Case study: How independent podcasters use voice synthesis to create intro/outro content and multilingual versions.",
       category: "Use Cases",
+      categorySlug: "use-cases",
       date: "Oct 25, 2025",
       readTime: "7 min read",
       author: "Alex Turner",
       tag: "Case Study",
     },
     {
+      id: "voice-ai-api-integration",
       title: "Voice AI API Integration: Best Practices",
       excerpt: "Essential tips for integrating voice synthesis into your application: rate limiting, error handling, and caching strategies.",
       category: "Tutorials",
+      categorySlug: "tutorials",
       date: "Oct 22, 2025",
       readTime: "11 min read",
       author: "Dev Team",
       tag: "Technical",
     },
     {
+      id: "future-multilingual-voice",
       title: "The Future of Multilingual Voice Content",
       excerpt: "How AI voice technology is breaking language barriers and enabling creators to reach global audiences.",
       category: "Product Updates",
+      categorySlug: "updates",
       date: "Oct 19, 2025",
       readTime: "8 min read",
       author: "Sarah Chen",
       tag: "Trending",
     },
     {
+      id: "optimizing-audio-quality",
       title: "Optimizing Audio Quality: Pro Tips",
       excerpt: "Advanced techniques for getting the best audio output: pitch adjustment, speed control, and format selection.",
       category: "Tutorials",
+      categorySlug: "tutorials",
       date: "Oct 16, 2025",
       readTime: "9 min read",
       author: "Marcus Johnson",
       tag: "Pro Tips",
     },
     {
+      id: "voice-ai-elearning",
       title: "Voice AI for E-Learning: A Teacher's Perspective",
       excerpt: "How educators are using voice synthesis to create engaging, accessible, and scalable learning content.",
       category: "Use Cases",
+      categorySlug: "use-cases",
       date: "Oct 13, 2025",
       readTime: "6 min read",
       author: "Jennifer Liu",
@@ -117,21 +140,18 @@ export default function BlogPage() {
     },
   ]
 
+  // Filter posts by selected category
+  const filteredPosts = useMemo(() => {
+    if (selectedCategory === "all") {
+      return blogPosts
+    }
+    return blogPosts.filter(post => post.categorySlug === selectedCategory)
+  }, [selectedCategory])
+
   return (
     <main className="min-h-screen bg-white">
-      {/* Header */}
-      <Header
-        logoText="VoiceCraft"
-        navLinks={[
-          { label: "Features", href: "/features" },
-          { label: "Pricing", href: "/pricing" },
-          { label: "Demo", href: "/demo" },
-        ]}
-        ctaButton={{
-          text: "Get Started",
-          href: "/signup",
-        }}
-      />
+      {/* Navigation */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 border-b-8 border-black">
@@ -151,15 +171,16 @@ export default function BlogPage() {
         </Container>
       </section>
 
-      {/* Category Filter */}
-      <section className="py-8 bg-black border-b-8 border-yellow-400">
+      {/* Category Filter - Sticky */}
+      <section className="sticky top-[80px] z-40 py-8 bg-black border-b-8 border-yellow-400 shadow-xl">
         <Container maxWidth="xl">
           <div className="flex flex-wrap justify-center gap-4">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <button
-                key={index}
+                key={category.slug}
+                onClick={() => setSelectedCategory(category.slug)}
                 className={`px-6 py-3 font-bold uppercase text-sm border-4 ${
-                  index === 0
+                  selectedCategory === category.slug
                     ? "bg-yellow-400 text-black border-yellow-400"
                     : "bg-transparent text-white border-white hover:bg-white hover:text-black"
                 } transition-all`}
@@ -211,13 +232,15 @@ export default function BlogPage() {
                 </div>
               </div>
 
-              <Button
-                size="lg"
-                className="bg-yellow-400 text-black border-4 border-yellow-400 font-bold uppercase w-fit"
-              >
-                Read Article
-                <RiArrowRightLine className="w-5 h-5 ml-2" />
-              </Button>
+              <Link href={`/blog/${featuredPost.id}`}>
+                <Button
+                  size="lg"
+                  className="bg-yellow-400 text-black border-4 border-yellow-400 font-bold uppercase w-fit"
+                >
+                  Read Article
+                  <RiArrowRightLine className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
         </Container>
@@ -236,7 +259,7 @@ export default function BlogPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post, index) => {
+            {filteredPosts.map((post, index) => {
               const bgColors = ["bg-white", "bg-black", "bg-yellow-400"]
               const textColors = ["text-black", "text-yellow-400", "text-black"]
               const excerptColors = ["text-gray-700", "text-white", "text-gray-900"]
@@ -324,17 +347,19 @@ export default function BlogPage() {
                     </div>
 
                     {/* Read More */}
-                    <button
-                      className={`w-full py-3 font-bold uppercase text-sm border-4 ${
-                        colorIndex === 1
-                          ? "bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-300"
-                          : colorIndex === 2
-                          ? "bg-black text-yellow-400 border-black hover:bg-gray-900"
-                          : "bg-black text-yellow-400 border-black hover:bg-gray-900"
-                      } transition-all`}
-                    >
-                      Read More →
-                    </button>
+                    <Link href={`/blog/${post.id}`} className="w-full">
+                      <button
+                        className={`w-full py-3 font-bold uppercase text-sm border-4 ${
+                          colorIndex === 1
+                            ? "bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-300"
+                            : colorIndex === 2
+                            ? "bg-black text-yellow-400 border-black hover:bg-gray-900"
+                            : "bg-black text-yellow-400 border-black hover:bg-gray-900"
+                        } transition-all`}
+                      >
+                        Read More →
+                      </button>
+                    </Link>
                   </div>
                 </div>
               )

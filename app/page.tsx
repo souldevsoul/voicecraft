@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Button, Heading, Text } from "@/components/ui"
 import { Waveform, AudioPlayer } from "@/components/voicecraft"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
 import { NewsletterPopup } from "@/components/marketing/NewsletterPopup"
 import {
@@ -120,30 +121,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b-4 border-black bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-black border-4 border-black flex items-center justify-center brutalist-shadow-yellow">
-              <RiMic2Fill className="w-7 h-7 text-yellow-400" />
-            </div>
-            <span className="text-xl font-bold uppercase tracking-tight">VOICECRAFT</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Pricing</a>
-            <a href="/about" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">About</a>
-            <a href="/contact" className="text-sm font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors">Contact</a>
-          </nav>
-          <Button
-            size="md"
-            className="bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-black font-bold uppercase"
-            onClick={() => window.location.href = '/dashboard'}
-          >
-            Get Started
-          </Button>
-        </div>
-      </header>
+      {/* Navigation */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-yellow-50 to-white border-b-8 border-black min-h-[90vh] flex items-center">

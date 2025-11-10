@@ -2,7 +2,7 @@
 
 import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
-import { Header } from "@/components/marketing/layout/header"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
 import {
   RiMailLine,
@@ -84,19 +84,8 @@ export default function ContactPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Header */}
-      <Header
-        logoText="VoiceCraft"
-        navLinks={[
-          { label: "Features", href: "/features" },
-          { label: "Pricing", href: "/pricing" },
-          { label: "Demo", href: "/demo" },
-        ]}
-        ctaButton={{
-          text: "Get Started",
-          href: "/signup",
-        }}
-      />
+      {/* Navigation */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 border-b-8 border-black">

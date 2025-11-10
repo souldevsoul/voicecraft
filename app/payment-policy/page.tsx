@@ -1,7 +1,7 @@
 "use client"
 
 import { Container } from "@/components/ui/container"
-import { Header } from "@/components/marketing/layout/header"
+import { Navbar } from "@/components/shared"
 import { Footer } from "@/components/marketing/layout/footer"
 import { RiSecurePaymentLine, RiMoneyDollarCircleLine, RiShieldCheckLine, RiAlertLine } from "react-icons/ri"
 import { SiVisa, SiMastercard, SiApplepay, SiGooglepay } from "react-icons/si"
@@ -11,18 +11,7 @@ export default function PaymentPolicyPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Header
-        logoText="VoiceCraft"
-        navLinks={[
-          { label: "Features", href: "/features" },
-          { label: "Pricing", href: "/pricing" },
-          { label: "Demo", href: "/demo" },
-        ]}
-        ctaButton={{
-          text: "Get Started",
-          href: "/signup",
-        }}
-      />
+      <Navbar />
 
       <section className="py-20 border-b-8 border-black">
         <Container maxWidth="xl">

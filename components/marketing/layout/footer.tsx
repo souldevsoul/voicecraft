@@ -30,17 +30,17 @@ export function Footer() {
             <div className="mb-6">
               <p className="text-xs font-bold uppercase text-gray-400 mb-3">Accepted Payment Methods</p>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white px-3 py-2 border-2 border-white flex items-center justify-center">
-                  <SiVisa className="w-12 h-8 text-[#1A1F71]" />
+                <div className="bg-white px-3 py-2 border-2 border-yellow-400 flex items-center justify-center rounded-sm">
+                  <SiVisa className="w-12 h-8 text-[#1A1F71]" style={{ filter: 'brightness(1) contrast(1.2)' }} />
                 </div>
-                <div className="bg-white px-3 py-2 border-2 border-white flex items-center justify-center">
-                  <SiMastercard className="w-12 h-8" />
+                <div className="bg-white px-3 py-2 border-2 border-yellow-400 flex items-center justify-center rounded-sm">
+                  <SiMastercard className="w-12 h-8 text-[#EB001B]" style={{ filter: 'brightness(1) contrast(1.2)' }} />
                 </div>
-                <div className="bg-white px-3 py-2 border-2 border-white flex items-center justify-center">
-                  <SiApplepay className="w-12 h-8 text-black" />
+                <div className="bg-white px-3 py-2 border-2 border-yellow-400 flex items-center justify-center rounded-sm">
+                  <SiApplepay className="w-12 h-8 text-black" style={{ filter: 'brightness(0.1)' }} />
                 </div>
-                <div className="bg-white px-3 py-2 border-2 border-white flex items-center justify-center">
-                  <SiGooglepay className="w-12 h-8" />
+                <div className="bg-white px-3 py-2 border-2 border-yellow-400 flex items-center justify-center rounded-sm">
+                  <SiGooglepay className="w-12 h-8 text-[#4285F4]" style={{ filter: 'brightness(0.9) contrast(1.5) saturate(1.5)' }} />
                 </div>
               </div>
             </div>
