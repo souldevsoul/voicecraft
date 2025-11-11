@@ -1,0 +1,77 @@
+{
+  "plugins": ["./eslint-plugin-product-quality"],
+  "rules": {
+    // ========================================
+    // LINK VALIDATION (Critical for UX)
+    // ========================================
+    "product-quality/no-broken-internal-links": "error",
+    "product-quality/no-external-links-without-target": "warn",
+
+    // ========================================
+    // ACCESSIBILITY & COLORS (WCAG Compliance)
+    // ========================================
+    "product-quality/enforce-color-contrast": "warn",
+    "product-quality/use-styleguide-colors-only": [
+      "error",
+      {
+        "allowedColors": [
+          "black",
+          "white",
+          "gray-50",
+          "gray-100",
+          "gray-200",
+          "gray-300",
+          "gray-400",
+          "gray-500",
+          "gray-600",
+          "gray-700",
+          "gray-800",
+          "gray-900",
+          "red-600",
+          "red-700"
+        ]
+      }
+    ],
+
+    // ========================================
+    // CONTENT CONSISTENCY
+    // ========================================
+    "product-quality/consistent-payment-providers": [
+      "error",
+      {
+        "provider": "stripe"
+      }
+    ],
+    "product-quality/consistent-company-info": [
+      "error",
+      {
+        "companyName": "BookTrailer Pro, LLC",
+        "address": "456 Literary Lane, Suite 200, San Francisco, CA 94105",
+        "phone": "+1 (415) 555-1234",
+        "email": "support@booktrailerpro.com"
+      }
+    ],
+
+    // ========================================
+    // PAGE STRUCTURE & SEO
+    // ========================================
+    "product-quality/require-page-metadata": "error",
+    "product-quality/require-proper-page-structure": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["app/**/page.tsx", "app/**/page.jsx"],
+      "rules": {
+        "product-quality/require-page-metadata": "error",
+        "product-quality/require-proper-page-structure": "error"
+      }
+    },
+    {
+      "files": ["components/**/*.tsx", "components/**/*.jsx"],
+      "rules": {
+        "product-quality/no-broken-internal-links": "error",
+        "product-quality/use-styleguide-colors-only": "error"
+      }
+    }
+  ]
+}
