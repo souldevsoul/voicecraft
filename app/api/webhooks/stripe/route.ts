@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeClient, getStripeWebhookSecret } from '@/lib/stripe';
 import { purchaseCredits } from '@/lib/credits';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +14,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!webhookSecret) {
+    // Get webhook secret (will throw if not configured)
+    let webhookSecret: string;
+    try {
+      webhookSecret = getStripeWebhookSecret();
+    } catch (error: any) {
       console.error('STRIPE_WEBHOOK_SECRET is not configured');
       return NextResponse.json(
         { error: 'Webhook not configured' },
@@ -28,8 +26,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Initialize Stripe client (lazy initialization)
+    const stripe = getStripeClient();
+
     // Verify webhook signature
-    let event: Stripe.Event;
+    let event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: any) {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
 
         // Extract metadata
         const userId = session.metadata?.userId;
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         console.log('Checkout session expired:', session.id);
         break;
       }

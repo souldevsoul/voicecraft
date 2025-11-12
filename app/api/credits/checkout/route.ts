@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/get-current-user';
-import Stripe from 'stripe';
-
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-});
+import { getStripeClient, isStripeConfigured } from '@/lib/stripe';
 
 // Validation schema
 const CheckoutSchema = z.object({
@@ -24,12 +19,15 @@ export async function POST(request: NextRequest) {
     const { packageId, credits, price } = CheckoutSchema.parse(body);
 
     // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!isStripeConfigured()) {
       return NextResponse.json(
         { error: 'Payment system is not configured' },
         { status: 500 }
       );
     }
+
+    // Initialize Stripe client (lazy initialization)
+    const stripe = getStripeClient();
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

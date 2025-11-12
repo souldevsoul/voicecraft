@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import Stripe from "stripe"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover",
-})
+import { getStripeClient, isStripeConfigured } from "@/lib/stripe"
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,8 +51,9 @@ export async function POST(request: NextRequest) {
     }
 
     // If subscription has Stripe ID, cancel it in Stripe
-    if (subscription.stripeSubscriptionId) {
+    if (subscription.stripeSubscriptionId && isStripeConfigured()) {
       try {
+        const stripe = getStripeClient()
         await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
           cancel_at_period_end: true,
         })
