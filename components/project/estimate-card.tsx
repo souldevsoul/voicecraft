@@ -214,8 +214,8 @@ export function EstimateCard({
 
                       // Handle both number format and object format {hours: X, cost: Y}
                       const hours = typeof value === 'object' && value !== null && 'hours' in value
-                        ? value.hours
-                        : value
+                        ? (value as { hours: number }).hours
+                        : (value as number)
 
                       return (
                         <div key={key} className="flex items-center justify-between">
