@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -15,7 +15,7 @@ import {
   RiCheckLine,
 } from "react-icons/ri"
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -306,5 +306,24 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <RiUserLine className="w-10 h-10 text-yellow-400" />
+            </div>
+            <p className="text-gray-600 font-bold uppercase">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <SignUpForm />
+    </Suspense>
   )
 }

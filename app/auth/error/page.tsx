@@ -1,31 +1,31 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { RiErrorWarningLine, RiArrowLeftLine } from "react-icons/ri"
 
-export default function AuthErrorPage() {
+const errorMessages: Record<string, string> = {
+  Configuration: "There is a problem with the server configuration.",
+  AccessDenied: "You do not have permission to sign in.",
+  Verification: "The verification link has expired or has already been used.",
+  OAuthSignin: "Error in constructing an authorization URL.",
+  OAuthCallback: "Error in handling the response from the OAuth provider.",
+  OAuthCreateAccount: "Could not create OAuth provider user in the database.",
+  EmailCreateAccount: "Could not create email provider user in the database.",
+  Callback: "Error in the OAuth callback handler route.",
+  OAuthAccountNotLinked:
+    "The email is already associated with another account.",
+  EmailSignin: "The email could not be sent.",
+  CredentialsSignin: "Sign in failed. Check the details you provided are correct.",
+  SessionRequired: "Please sign in to access this page.",
+  Default: "An error occurred during authentication.",
+}
+
+function ErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
-
-  const errorMessages: Record<string, string> = {
-    Configuration: "There is a problem with the server configuration.",
-    AccessDenied: "You do not have permission to sign in.",
-    Verification: "The verification link has expired or has already been used.",
-    OAuthSignin: "Error in constructing an authorization URL.",
-    OAuthCallback: "Error in handling the response from the OAuth provider.",
-    OAuthCreateAccount: "Could not create OAuth provider user in the database.",
-    EmailCreateAccount: "Could not create email provider user in the database.",
-    Callback: "Error in the OAuth callback handler route.",
-    OAuthAccountNotLinked:
-      "The email is already associated with another account.",
-    EmailSignin: "The email could not be sent.",
-    CredentialsSignin: "Sign in failed. Check the details you provided are correct.",
-    SessionRequired: "Please sign in to access this page.",
-    Default: "An error occurred during authentication.",
-  }
-
   const errorMessage = error ? errorMessages[error] || errorMessages.Default : errorMessages.Default
 
   return (
@@ -88,5 +88,24 @@ export default function AuthErrorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-4">
+              <RiErrorWarningLine className="w-10 h-10 text-yellow-400 animate-pulse" />
+            </div>
+            <p className="text-gray-600 font-bold uppercase">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <ErrorContent />
+    </Suspense>
   )
 }
