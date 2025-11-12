@@ -1,0 +1,19 @@
+{
+  "name": "eslint-plugin-product-quality",
+  "version": "1.0.0",
+  "description": "ESLint plugin for product quality checks: links, accessibility, brand consistency, content validation",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "product-quality",
+    "accessibility",
+    "links",
+    "brand-consistency"
+  ],
+  "author": "BookTrailer Pro Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": ">=8.0.0"
+  }
+}
