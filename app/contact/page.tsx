@@ -214,7 +214,7 @@ export default function ContactPage() {
             </div>
 
             <div className="bg-white p-8 border-4 border-black brutalist-shadow">
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Form submission not yet implemented"); }}>
                 {/* Name */}
                 <div>
                   <label htmlFor="name" className="block text-sm font-bold uppercase mb-2">

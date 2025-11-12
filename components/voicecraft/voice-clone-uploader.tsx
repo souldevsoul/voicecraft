@@ -54,7 +54,7 @@ const VoiceCloneUploader = React.forwardRef<HTMLDivElement, VoiceCloneUploaderPr
     const getStatusIcon = (status: UploadedFile["status"]) => {
       switch (status) {
         case "ready":
-          return <CheckCircle2 size={20} className="text-emerald-600" />
+          return <CheckCircle2 size={20} className="text-green-600" />
         case "error":
           return <AlertCircle size={20} className="text-red-600" />
         case "uploading":

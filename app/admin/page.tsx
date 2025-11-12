@@ -140,19 +140,19 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Specialists */}
-        <Card variant="outlined" className="border-4 border-cyan-500 bg-cyan-50">
+        <Card variant="outlined" className="border-4 border-cyan-500 bg-purple-50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-bold uppercase text-cyan-900">
+            <CardTitle className="text-sm font-bold uppercase text-purple-900">
               SPECIALISTS
             </CardTitle>
-            <RiTeamLine className="h-6 w-6 text-cyan-600" />
+            <RiTeamLine className="h-6 w-6 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <h2 className="text-3xl font-bold text-cyan-900">
+            <h2 className="text-3xl font-bold text-purple-900">
               {stats.totalSpecialists}
             </h2>
             <div className="mt-2 flex items-center gap-2">
-              <Text variant="caption" className="text-xs text-cyan-800">
+              <Text variant="caption" className="text-xs text-purple-800">
                 {stats.pendingSpecialists} pending approval
               </Text>
             </div>
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
 
           <Card variant="outlined" className="border-4 border-black hover:shadow-[4px_4px_0_0_#000] transition-shadow cursor-pointer">
             <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-              <RiTeamLine className="h-12 w-12 text-cyan-600" />
+              <RiTeamLine className="h-12 w-12 text-purple-600" />
               <h3 className="mt-4 text-sm font-bold uppercase tracking-tight">
                 MANAGE SPECIALISTS
               </h3>

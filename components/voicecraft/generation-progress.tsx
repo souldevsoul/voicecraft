@@ -170,7 +170,7 @@ const GenerationProgress = React.forwardRef<HTMLDivElement, GenerationProgressPr
                     )}
                   </div>
                   {step.status === "completed" && (
-                    <div className="text-xs text-emerald-600 font-medium">
+                    <div className="text-xs text-green-600 font-medium">
                       Done
                     </div>
                   )}

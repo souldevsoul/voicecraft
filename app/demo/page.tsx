@@ -129,7 +129,7 @@ export default function DemoPage() {
               Sign up for a free account and unlock unlimited voice generation
             </p>
             <a
-              href="/signup"
+              href="/auth/signup"
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold uppercase bg-yellow-400 text-black border-4 border-black hover:bg-yellow-300 transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
             >
               Create Free Account

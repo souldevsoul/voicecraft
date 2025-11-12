@@ -412,7 +412,7 @@ export default function AboutPage() {
                 className="gap-3 bg-yellow-400 text-black border-4 border-black font-bold uppercase brutalist-shadow"
                 asChild
               >
-                <a href="/signup">
+                <a href="/auth/signup">
                   <RiArrowRightLine className="w-5 h-5" />
                   Get Started Free
                 </a>

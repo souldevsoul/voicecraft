@@ -655,7 +655,7 @@ export default function ComponentsPage() {
                 date="2024-01-15"
                 readTime="5 min read"
                 category="TUTORIAL"
-                href="/blog/getting-started"
+                href="/blog"
               />
               <BlogCard
                 title="VOICE CLONING: THE COMPLETE GUIDE"
@@ -664,7 +664,7 @@ export default function ComponentsPage() {
                 date="2024-01-10"
                 readTime="8 min read"
                 category="GUIDE"
-                href="/blog/voice-cloning-guide"
+                href="/blog"
               />
               <BlogCard
                 title="10 CREATIVE USES FOR AI VOICES"
@@ -673,7 +673,7 @@ export default function ComponentsPage() {
                 date="2024-01-05"
                 readTime="6 min read"
                 category="INSPIRATION"
-                href="/blog/creative-uses"
+                href="/blog"
               />
             </div>
           </div>

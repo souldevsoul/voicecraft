@@ -79,15 +79,15 @@ export function WorkReviewCard({
 
   return (
     <>
-      <Card variant="outlined" className="border-4 border-cyan-500 bg-cyan-50">
+      <Card variant="outlined" className="border-4 border-cyan-500 bg-purple-50">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <CardTitle className="flex items-center gap-2 text-cyan-900">
-                <RiCheckLine className="h-6 w-6 text-cyan-600" />
+              <CardTitle className="flex items-center gap-2 text-purple-900">
+                <RiCheckLine className="h-6 w-6 text-purple-600" />
                 WORK SUBMITTED FOR REVIEW
               </CardTitle>
-              <CardDescription className="text-cyan-800">
+              <CardDescription className="text-purple-800">
                 {expertName} submitted completed work on{" "}
                 {new Date(submittedWork.submittedAt).toLocaleDateString()}
               </CardDescription>
@@ -307,7 +307,7 @@ export function WorkReviewCard({
             <AlertDialogAction
               onClick={handleRequestChanges}
               disabled={changeRequest.length < 10 || loading}
-              className="bg-orange-400 text-black border-4 border-black hover:bg-orange-500"
+              className="bg-yellow-400 text-black border-4 border-black hover:bg-orange-500"
             >
               {loading ? "SENDING..." : "SEND FEEDBACK"}
             </AlertDialogAction>

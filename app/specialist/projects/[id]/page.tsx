@@ -261,10 +261,10 @@ export default function SpecialistProjectDetailPage({
 
       {/* Submitted Work - For in_review and completed */}
       {(project.status === "in_review" || project.status === "completed") && project.submittedAt && (
-        <Card variant="outlined" className="border-4 border-cyan-500 bg-cyan-50">
+        <Card variant="outlined" className="border-4 border-cyan-500 bg-purple-50">
           <CardHeader>
-            <CardTitle className="text-cyan-900">SUBMITTED WORK</CardTitle>
-            <Text variant="caption" className="text-xs text-cyan-800">
+            <CardTitle className="text-purple-900">SUBMITTED WORK</CardTitle>
+            <Text variant="caption" className="text-xs text-purple-800">
               Submitted on {new Date(project.submittedAt).toLocaleDateString()}
             </Text>
           </CardHeader>
@@ -305,11 +305,11 @@ export default function SpecialistProjectDetailPage({
             </div>
 
             {project.status === "in_review" && (
-              <div className="rounded-md border-2 border-cyan-500 bg-cyan-100 p-4">
-                <Text variant="body" className="font-bold text-cyan-900">
+              <div className="rounded-md border-2 border-cyan-500 bg-purple-100 p-4">
+                <Text variant="body" className="font-bold text-purple-900">
                   ⏳ Waiting for client review
                 </Text>
-                <Text variant="caption" className="mt-1 text-xs text-cyan-800">
+                <Text variant="caption" className="mt-1 text-xs text-purple-800">
                   The client will review your work and either approve it or request changes.
                 </Text>
               </div>
