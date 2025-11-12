@@ -12,6 +12,11 @@ import { Text, Heading } from "@/components/ui/typography"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DashboardQuickActions } from "@/components/dashboard/dashboard-quick-actions"
+import { DashboardCreditsCard } from "@/components/dashboard/dashboard-credits-card"
+import { DashboardSubscriptionBanner } from "@/components/dashboard/dashboard-subscription-banner"
+import { getCurrentUserId } from "@/lib/get-current-user"
+import { prisma } from "@/lib/prisma"
+import { redirect } from "next/navigation"
 
 type DashboardStats = {
   totalAudios: number
@@ -19,6 +24,13 @@ type DashboardStats = {
   totalProjects: number
   creditsRemaining: number
 }
+
+type UserSubscription = {
+  plan: string
+  status: string
+  isTrialing: boolean
+  trialEndsAt: Date | null
+} | null
 
 type RecentAudio = {
   id: string
@@ -30,26 +42,26 @@ type RecentAudio = {
 
 async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    // Get current user from session
+    const userId = await getCurrentUserId()
 
-    // Fetch all counts in parallel
-    const [audiosRes, voicesRes, projectsRes] = await Promise.all([
-      fetch(`${baseUrl}/api/audios?limit=1`, { cache: 'no-store' }),
-      fetch(`${baseUrl}/api/voices?limit=1`, { cache: 'no-store' }),
-      fetch(`${baseUrl}/api/projects?limit=1`, { cache: 'no-store' }),
-    ])
+    if (!userId) {
+      redirect('/auth/signin')
+    }
 
-    const [audiosData, voicesData, projectsData] = await Promise.all([
-      audiosRes.ok ? audiosRes.json() : { pagination: { total: 0 } },
-      voicesRes.ok ? voicesRes.json() : { pagination: { total: 0 } },
-      projectsRes.ok ? projectsRes.json() : { pagination: { total: 0 } },
+    // Query database directly using Prisma - get all counts in parallel
+    const [totalAudios, totalVoices, totalProjects, user] = await Promise.all([
+      prisma.audio.count({ where: { userId } }),
+      prisma.voice.count({ where: { userId } }),
+      prisma.project.count({ where: { userId } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { credits: true } }),
     ])
 
     return {
-      totalAudios: audiosData.pagination?.total || 0,
-      totalVoices: voicesData.pagination?.total || 0,
-      totalProjects: projectsData.pagination?.total || 0,
-      creditsRemaining: 1250, // TODO: Get from user subscription
+      totalAudios,
+      totalVoices,
+      totalProjects,
+      creditsRemaining: user?.credits || 0,
     }
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
@@ -64,29 +76,31 @@ async function getDashboardStats(): Promise<DashboardStats> {
 
 async function getRecentAudios(): Promise<RecentAudio[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/audios?limit=5&sortBy=createdAt&sortOrder=desc`, {
-      cache: 'no-store',
+    // Get current user from session
+    const userId = await getCurrentUserId()
+
+    if (!userId) {
+      redirect('/auth/signin')
+    }
+
+    // Query database directly using Prisma
+    const audios = await prisma.audio.findMany({
+      where: { userId },
+      include: {
+        voice: {
+          select: { name: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
     })
 
-    if (!response.ok) {
-      console.error('Failed to fetch recent audios:', response.statusText)
-      return []
-    }
-
-    const data = await response.json()
-
-    if (!data.success || !data.audios) {
-      console.error('Invalid API response:', data)
-      return []
-    }
-
-    // Map API response to RecentAudio type
-    return data.audios.map((audio: any) => ({
+    // Map to RecentAudio type
+    return audios.map((audio) => ({
       id: audio.id,
       filename: audio.filename,
       voiceName: audio.voice?.name || null,
-      createdAt: new Date(audio.createdAt).toISOString(),
+      createdAt: audio.createdAt.toISOString(),
       status: audio.status,
     }))
   } catch (error) {
@@ -95,9 +109,36 @@ async function getRecentAudios(): Promise<RecentAudio[]> {
   }
 }
 
+async function getUserSubscription(): Promise<UserSubscription> {
+  try {
+    const userId = await getCurrentUserId()
+
+    if (!userId) {
+      redirect('/auth/signin')
+    }
+
+    const subscription = await prisma.subscription.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        plan: true,
+        status: true,
+        isTrialing: true,
+        trialEndsAt: true,
+      },
+    })
+
+    return subscription
+  } catch (error) {
+    console.error('Error fetching subscription:', error)
+    return null
+  }
+}
+
 export default async function DashboardPage() {
   const stats = await getDashboardStats()
   const recentAudios = await getRecentAudios()
+  const subscription = await getUserSubscription()
 
   const statCards = [
     {
@@ -139,6 +180,8 @@ export default async function DashboardPage() {
       </div>
 
       <Suspense fallback={<div>Loading...</div>}>
+        {/* Subscription Banner */}
+        <DashboardSubscriptionBanner subscription={subscription} />
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => {
@@ -228,62 +271,7 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Credits Card */}
-          <Card variant="outlined" className="col-span-3 p-6">
-            <div className="flex items-center justify-between">
-              <Heading variant="h3" className="uppercase">
-                Credits
-              </Heading>
-              <Button variant="primary" size="sm">
-                Buy More
-              </Button>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-center">
-                <div className="flex h-32 w-32 items-center justify-center border-4 border-black bg-yellow-400">
-                  <div className="text-center">
-                    <Heading as="h2" className="text-4xl font-bold">
-                      {stats.creditsRemaining}
-                    </Heading>
-                    <Text variant="caption" className="text-xs uppercase">
-                      Remaining
-                    </Text>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2 border-t-2 border-black pt-4">
-                <div className="flex items-center justify-between text-sm">
-                  <Text variant="caption" className="text-slate-600">
-                    Voice Generation
-                  </Text>
-                  <Text variant="body" className="font-medium">
-                    10 credits
-                  </Text>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <Text variant="caption" className="text-slate-600">
-                    Voice Cloning
-                  </Text>
-                  <Text variant="body" className="font-medium">
-                    50 credits
-                  </Text>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <Text variant="caption" className="text-slate-600">
-                    AI Estimation
-                  </Text>
-                  <Text variant="body" className="font-medium">
-                    5 credits
-                  </Text>
-                </div>
-              </div>
-
-              <Button variant="outline" className="w-full">
-                View Pricing
-              </Button>
-            </div>
-          </Card>
+          <DashboardCreditsCard creditsRemaining={stats.creditsRemaining} />
         </div>
 
         {/* Quick Actions */}

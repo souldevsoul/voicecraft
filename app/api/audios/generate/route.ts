@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import Replicate from 'replicate';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Initialize Replicate client
 const replicate = new Replicate({
@@ -29,8 +30,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = GenerateAudioSchema.parse(body);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Check if voice exists (either preset or custom cloned voice)
     let voice = null;

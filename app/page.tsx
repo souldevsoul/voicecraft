@@ -73,14 +73,15 @@ export default function Home() {
       price: "$0",
       description: "Perfect for trying out VoiceCraft",
       features: [
-        { text: "10,000 characters/month", included: true },
-        { text: "5 preset voices", included: true },
+        { text: "5,000 characters/month", included: true },
+        { text: "Basic voice presets", included: true },
         { text: "MP3 downloads", included: true },
         { text: "Voice cloning", included: false },
         { text: "Commercial use", included: false },
         { text: "Priority support", included: false },
       ],
       ctaText: "GET STARTED FREE",
+      ctaLink: "/auth/signup",
       popular: false,
     },
     {
@@ -89,15 +90,18 @@ export default function Home() {
       description: "For professionals and content creators",
       features: [
         { text: "100,000 characters/month", included: true },
-        { text: "50+ preset voices", included: true },
-        { text: "WAV & MP3 downloads", included: true },
-        { text: "3 voice clones", included: true },
+        { text: "All voice models", included: true },
+        { text: "5 voice clones", included: true },
+        { text: "WAV, MP3, FLAC formats", included: true },
+        { text: "50+ languages", included: true },
         { text: "Commercial use", included: true },
         { text: "Priority support", included: true },
-        { text: "API access", included: false },
+        { text: "API access", included: true },
       ],
-      ctaText: "START FREE TRIAL",
+      ctaText: "START 14-DAY FREE TRIAL",
+      ctaLink: "/auth/signup?plan=pro",
       popular: true,
+      trialInfo: "No credit card required",
     },
     {
       name: "ENTERPRISE",
@@ -105,16 +109,18 @@ export default function Home() {
       description: "For teams and organizations",
       features: [
         { text: "Unlimited characters", included: true },
-        { text: "All preset voices", included: true },
-        { text: "All audio formats", included: true },
+        { text: "All voice models + beta", included: true },
         { text: "Unlimited voice clones", included: true },
+        { text: "All audio formats", included: true },
+        { text: "Custom model training", included: true },
         { text: "Commercial use", included: true },
-        { text: "Dedicated support", included: true },
+        { text: "Dedicated support 24/7", included: true },
         { text: "Full API access", included: true },
         { text: "Custom integrations", included: true },
         { text: "SLA guarantee", included: true },
       ],
       ctaText: "CONTACT SALES",
+      ctaLink: "/contact",
       popular: false,
     },
   ]
@@ -164,7 +170,7 @@ export default function Home() {
               <Button
                 size="xl"
                 className="gap-3 bg-black text-yellow-400 hover:bg-gray-900 border-4 border-black font-bold uppercase brutalist-shadow text-lg px-12 py-8"
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => window.location.href = '/auth/signup'}
               >
                 <RiArrowRightLine className="w-6 h-6" />
                 Start Free Now
@@ -332,6 +338,11 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
+                {plan.trialInfo && (
+                  <Text variant="body-sm" className="mb-4 text-center text-white font-medium">
+                    {plan.trialInfo}
+                  </Text>
+                )}
                 <Button
                   size="lg"
                   className={`w-full gap-3 border-4 border-black font-bold uppercase ${
@@ -339,6 +350,7 @@ export default function Home() {
                       ? "bg-yellow-400 text-black hover:bg-yellow-300"
                       : "bg-black text-yellow-400 hover:bg-gray-900"
                   }`}
+                  onClick={() => window.location.href = plan.ctaLink}
                 >
                   {plan.ctaText}
                   <RiArrowRightLine className="w-5 h-5" />
@@ -366,10 +378,10 @@ export default function Home() {
             <Button
               size="xl"
               className="gap-3 bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-yellow-400 font-bold uppercase brutalist-shadow-yellow"
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={() => window.location.href = '/auth/signup?plan=pro'}
             >
               <RiArrowRightLine className="w-5 h-5" />
-              Start Free Trial
+              Start 14-Day Free Trial
             </Button>
             <Button
               size="xl"

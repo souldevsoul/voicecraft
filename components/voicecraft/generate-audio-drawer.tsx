@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { RiSoundModuleLine, RiLoader4Line } from "react-icons/ri"
 import {
   Sheet,
@@ -35,6 +36,7 @@ type GenerateAudioDrawerProps = {
 }
 
 export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerProps) {
+  const router = useRouter()
   const [text, setText] = useState("")
   const [voiceId, setVoiceId] = useState("Wise_Woman")
   const [emotion, setEmotion] = useState("auto")
@@ -43,6 +45,7 @@ export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerP
   const [loading, setLoading] = useState(false)
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -52,7 +55,7 @@ export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerP
 
   const fetchVoices = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       const response = await fetch(`${baseUrl}/api/voices`, {
         cache: 'no-store',
       })
@@ -77,16 +80,16 @@ export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerP
     setLoading(true)
     setError(null)
     setGeneratedAudioUrl(null)
+    setSuccess(false)
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       const response = await fetch(`${baseUrl}/api/voices/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text,
           voiceId,
-          userId: 'temp-user-id', // TODO: Get from session
           emotion,
           speed,
         }),
@@ -95,10 +98,27 @@ export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerP
       const data = await response.json()
 
       if (!response.ok) {
+        // Handle insufficient credits error (402)
+        if (response.status === 402) {
+          throw new Error(
+            data.details ||
+            `Insufficient credits. Voice generation requires ${data.required || 10} credits.`
+          )
+        }
         throw new Error(data.error || 'Failed to generate audio')
       }
 
       setGeneratedAudioUrl(data.audioUrl)
+      setSuccess(true)
+
+      // Show credit information if available
+      if (data.credits) {
+        console.log(`Credits charged: ${data.credits.charged}, New balance: ${data.credits.newBalance}`)
+      }
+
+      // Refresh dashboard to show new audio
+      router.refresh()
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate audio')
     } finally {
@@ -195,6 +215,15 @@ export function GenerateAudioDrawer({ open, onOpenChange }: GenerateAudioDrawerP
           {error && (
             <div className="rounded-md border-2 border-red-500 bg-red-50 p-4">
               <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
+          {/* Success Display */}
+          {success && (
+            <div className="rounded-md border-2 border-green-500 bg-green-50 p-4">
+              <p className="text-sm text-green-800 font-medium">
+                ✓ Audio generated successfully! Check your Audio Library.
+              </p>
             </div>
           )}
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -31,8 +32,8 @@ export async function POST(
     const body = await request.json();
     const { request: userRequest } = EstimateRequestSchema.parse(body);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get project with audios
     const project = await prisma.project.findFirst({
@@ -107,7 +108,7 @@ ${project.projectAudios.map((pa: any, index: number) =>
 
       // Call OpenAI for estimation
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -119,10 +120,22 @@ ${project.projectAudios.map((pa: any, index: number) =>
 - Quality requirements
 
 Provide a structured JSON response with:
-- estimatedCost (in USD)
-- estimatedDuration (in hours)
-- breakdown (object with cost and time breakdown)
-- recommendations (array of strings)`
+- estimatedCost (number, in USD)
+- estimatedDuration (number, total hours)
+- breakdown (object where each key is a task name and each value is the number of hours for that task, e.g., {"audioEditing": 5, "qualityAssurance": 2})
+- assumptions (array of strings with key assumptions made)
+
+Example format:
+{
+  "estimatedCost": 150.00,
+  "estimatedDuration": 8,
+  "breakdown": {
+    "audioEditing": 5,
+    "qualityAssurance": 2,
+    "projectManagement": 1
+  },
+  "assumptions": ["Basic audio editing required", "No complex mixing needed"]
+}`
           },
           {
             role: 'user',

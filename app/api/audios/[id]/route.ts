@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schema for audio ID
 const AudioIdSchema = z.string().cuid();
@@ -25,8 +26,8 @@ export async function GET(
     // Validate audio ID
     const audioId = AudioIdSchema.parse(id);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get audio from database
     const audio = await prisma.audio.findFirst({
@@ -104,8 +105,8 @@ export async function PATCH(
     const body = await request.json();
     const validatedData = UpdateAudioSchema.parse(body);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Check if audio exists and belongs to user
     const existingAudio = await prisma.audio.findFirst({
@@ -174,8 +175,8 @@ export async function DELETE(
     // Validate audio ID
     const audioId = AudioIdSchema.parse(id);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get audio from database
     const audio = await prisma.audio.findFirst({

@@ -209,18 +209,25 @@ export function EstimateCard({
                     COST BREAKDOWN
                   </Heading>
                   <div className="space-y-2 rounded-md border-4 border-black bg-white p-4">
-                    {Object.entries(estimate.breakdown).map(([key, value]) => (
-                      value !== undefined && (
+                    {Object.entries(estimate.breakdown).map(([key, value]) => {
+                      if (value === undefined) return null
+
+                      // Handle both number format and object format {hours: X, cost: Y}
+                      const hours = typeof value === 'object' && value !== null && 'hours' in value
+                        ? value.hours
+                        : value
+
+                      return (
                         <div key={key} className="flex items-center justify-between">
                           <Text variant="body" className="capitalize">
-                            {key}
+                            {key.replace(/([A-Z])/g, ' $1').trim()}
                           </Text>
                           <Text variant="body" className="font-bold">
-                            {value} hours
+                            {typeof hours === 'number' ? hours : 0} hours
                           </Text>
                         </div>
                       )
-                    ))}
+                    })}
                   </div>
                 </div>
               </>

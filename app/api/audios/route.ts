@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schema for query parameters
 const ListAudiosQuerySchema = z.object({
@@ -16,8 +17,8 @@ const ListAudiosQuerySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;

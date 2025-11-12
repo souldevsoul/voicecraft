@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requireAuth } from '@/lib/get-current-user'
 
 const GenerateSongSchema = z.object({
   prompt: z.string().min(10, 'Prompt must be at least 10 characters'),
@@ -9,6 +10,9 @@ const GenerateSongSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user ID
+    const userId = await requireAuth()
+
     const body = await request.json()
     const data = GenerateSongSchema.parse(body)
 

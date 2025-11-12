@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Zod validation schema for query parameters
 const GetVoicesSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
   includePublic: z.string().optional().transform(val => val === 'true'),
   status: z.enum(['active', 'processing', 'failed', 'all']).optional().default('all'),
   page: z.string().optional().transform(val => val ? parseInt(val) : 1),
@@ -13,10 +13,12 @@ const GetVoicesSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    // Get authenticated user ID
+    const userId = await requireAuth();
+
     // Get and validate query parameters
     const searchParams = request.nextUrl.searchParams;
     const params = {
-      userId: searchParams.get('userId') || '',
       includePublic: searchParams.get('includePublic'),
       status: searchParams.get('status') as 'active' | 'processing' | 'failed' | 'all' | null,
       page: searchParams.get('page'),
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     // Build filter conditions
     const where: any = {
-      userId: validatedParams.userId,
+      userId,
     };
 
     if (validatedParams.status !== 'all') {

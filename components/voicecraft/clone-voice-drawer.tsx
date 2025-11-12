@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { RiVoiceprintLine, RiLoader4Line, RiUploadLine } from "react-icons/ri"
 import {
   Sheet,
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { put } from '@vercel/blob'
 
 type CloneVoiceDrawerProps = {
   open: boolean
@@ -29,6 +29,7 @@ type CloneVoiceDrawerProps = {
 }
 
 export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDrawerProps) {
+  const router = useRouter()
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [audioFile, setAudioFile] = useState<File | null>(null)
@@ -40,23 +41,64 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file
+      // Validate file type
       const validTypes = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/mp4']
       if (!validTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|m4a)$/i)) {
         setError("Please upload an MP3, WAV, or M4A audio file")
         return
       }
 
+      // Validate file size
       if (file.size > 20 * 1024 * 1024) { // 20MB limit
         setError("File size must be less than 20MB")
         return
       }
 
-      setAudioFile(file)
-      setError(null)
+      // Validate audio duration
+      try {
+        const audio = new Audio()
+        const objectUrl = URL.createObjectURL(file)
+
+        await new Promise<void>((resolve, reject) => {
+          audio.onloadedmetadata = () => {
+            URL.revokeObjectURL(objectUrl)
+
+            const duration = audio.duration
+
+            if (duration < 10) {
+              setError("Audio must be at least 10 seconds long for voice cloning")
+              reject(new Error("Audio too short"))
+              return
+            }
+
+            if (duration > 300) { // 5 minutes
+              setError("Audio must be less than 5 minutes long")
+              reject(new Error("Audio too long"))
+              return
+            }
+
+            resolve()
+          }
+
+          audio.onerror = () => {
+            URL.revokeObjectURL(objectUrl)
+            reject(new Error("Failed to load audio"))
+          }
+
+          audio.src = objectUrl
+        })
+
+        setAudioFile(file)
+        setError(null)
+      } catch (err) {
+        console.error('Audio validation error:', err)
+        if (!error) {
+          setError("Failed to validate audio file")
+        }
+      }
     }
   }
 
@@ -65,15 +107,25 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
 
     setUploading(true)
     try {
-      const blob = await put(
-        `voices/temp-user-id/${Date.now()}-${audioFile.name}`,
-        audioFile,
-        { access: 'public', addRandomSuffix: true }
-      )
+      // Create FormData to upload file via API
+      const formData = new FormData()
+      formData.append('file', audioFile)
 
-      return blob.url
+      const response = await fetch('/api/voices/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || 'Upload failed')
+      }
+
+      return data.url
     } catch (err) {
-      throw new Error("Failed to upload audio file")
+      console.error('Upload error:', err)
+      throw new Error(err instanceof Error ? err.message : "Failed to upload audio file")
     } finally {
       setUploading(false)
     }
@@ -106,12 +158,11 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
         throw new Error("Failed to get audio URL")
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       const response = await fetch(`${baseUrl}/api/voices/clone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: 'temp-user-id', // TODO: Get from session
           name,
           description,
           audioFileUrl: finalAudioUrl,
@@ -124,10 +175,26 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
       const data = await response.json()
 
       if (!response.ok) {
+        // Handle insufficient credits error (402)
+        if (response.status === 402) {
+          throw new Error(
+            data.details ||
+            `Insufficient credits. Voice cloning requires ${data.required || 50} credits.`
+          )
+        }
         throw new Error(data.error || 'Failed to clone voice')
       }
 
       setSuccess(true)
+
+      // Show credit information if available
+      if (data.credits) {
+        console.log(`Credits charged: ${data.credits.charged}, New balance: ${data.credits.newBalance}`)
+      }
+
+      // Refresh to show new voice
+      router.refresh()
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Call success callback after a short delay
       setTimeout(() => {
@@ -139,7 +206,7 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
         setAudioFile(null)
         setAudioUrl(null)
         setSuccess(false)
-      }, 2000)
+      }, 1500)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to clone voice')
@@ -253,12 +320,12 @@ export function CloneVoiceDrawer({ open, onOpenChange, onSuccess }: CloneVoiceDr
 
           {/* Requirements Info */}
           <div className="rounded-md border-2 border-blue-500 bg-blue-50 p-4">
-            <h4 className="text-sm font-bold text-blue-900 mb-2">Recording Tips</h4>
+            <h4 className="text-sm font-bold text-blue-900 mb-2">Audio Requirements</h4>
             <ul className="text-xs text-blue-800 space-y-1">
-              <li>• Use clear audio with minimal background noise</li>
-              <li>• Record 30-60 seconds of natural speech</li>
-              <li>• Speak at a normal pace with varied intonation</li>
-              <li>• Use a quiet environment or enable noise reduction</li>
+              <li>• <strong>Duration:</strong> 10 seconds minimum, 30-60 seconds recommended, 5 minutes maximum</li>
+              <li>• <strong>Quality:</strong> Clear audio with minimal background noise</li>
+              <li>• <strong>Speech:</strong> Natural pace with varied intonation</li>
+              <li>• <strong>Environment:</strong> Quiet setting or use noise reduction</li>
             </ul>
           </div>
 

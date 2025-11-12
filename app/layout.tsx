@@ -4,6 +4,7 @@ import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { mantineTheme } from '@/lib/mantine-theme';
 import { CookieConsent } from '@/components/marketing/CookieConsent';
+import { SessionProvider } from '@/components/providers/session-provider';
 import "./globals.css";
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -39,11 +40,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className={`${inter.variable} antialiased`}>
-        <MantineProvider theme={mantineTheme} defaultColorScheme="light">
-          <Notifications position="top-right" zIndex={1000} />
-          {children}
-          <CookieConsent />
-        </MantineProvider>
+        <SessionProvider>
+          <MantineProvider theme={mantineTheme} defaultColorScheme="light">
+            <Notifications position="top-right" zIndex={1000} />
+            {children}
+            <CookieConsent />
+          </MantineProvider>
+        </SessionProvider>
       </body>
     </html>
   );

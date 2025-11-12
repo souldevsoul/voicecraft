@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import Replicate from 'replicate';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
+import {
+  hasEnoughCredits,
+  deductVoiceGenerationCredits,
+  refundCredits,
+  CREDIT_COSTS
+} from '@/lib/credits';
 
 // Initialize Replicate client
 const replicate = new Replicate({
@@ -19,7 +27,6 @@ const MAX_CHARACTERS = 10000;
 const GenerateVoiceSchema = z.object({
   text: z.string().min(1, "Text is required").max(MAX_CHARACTERS, `Text cannot exceed ${MAX_CHARACTERS} characters`),
   voiceId: z.string().optional(), // Can be preset voice (e.g., "Wise_Woman") or custom cloned voice ID
-  userId: z.string().optional(), // Optional: for tracking usage and verifying custom voices
   emotion: z.enum(["auto", "happy", "sad", "angry", "excited", "calm", "serious", "friendly"]).default("auto"),
   speed: z.number().min(0.5).max(2.0).default(1.0),
   pitch: z.number().min(-12).max(12).default(0),
@@ -33,9 +40,25 @@ const GenerateVoiceSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user ID (required)
+    const userId = await requireAuth();
+
     // Parse and validate request body with Zod
     const body = await request.json();
     const validatedData = GenerateVoiceSchema.parse(body);
+
+    // Check if user has enough credits
+    const hasCredits = await hasEnoughCredits(userId, CREDIT_COSTS.VOICE_GENERATION);
+    if (!hasCredits) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient credits',
+          details: `Voice generation requires ${CREDIT_COSTS.VOICE_GENERATION} credits. Please purchase more credits.`,
+          required: CREDIT_COSTS.VOICE_GENERATION,
+        },
+        { status: 402 } // 402 Payment Required
+      );
+    }
 
     // Validate API token
     if (!process.env.REPLICATE_API_TOKEN) {
@@ -46,13 +69,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Deduct credits before processing
+    let creditResult;
+    try {
+      creditResult = await deductVoiceGenerationCredits(
+        userId,
+        {
+          text: validatedData.text.substring(0, 100), // First 100 chars for reference
+          characterCount: validatedData.text.length,
+        }
+      );
+    } catch (error: any) {
+      return NextResponse.json(
+        {
+          error: 'Failed to deduct credits',
+          details: error.message,
+        },
+        { status: 402 }
+      );
+    }
+
     // Determine voice ID to use
     let voiceIdToUse = validatedData.voiceId || "Wise_Woman";
     let isCustomVoice = false;
     let voiceDbRecord = null;
 
-    // If userId provided and voiceId looks like a custom voice (starts with 'v_' or is a cuid)
-    if (validatedData.userId && validatedData.voiceId && validatedData.voiceId !== "Wise_Woman") {
+    // If voiceId looks like a custom voice
+    if (validatedData.voiceId && validatedData.voiceId !== "Wise_Woman") {
       // Try to find the voice in database to verify ownership and get Replicate voice_id
       const voice = await prisma.voice.findFirst({
         where: {
@@ -60,7 +103,7 @@ export async function POST(request: NextRequest) {
             { id: validatedData.voiceId },           // By database ID
             { voiceId: validatedData.voiceId },      // By Replicate voice_id
           ],
-          userId: validatedData.userId,
+          userId: userId,
           status: 'active',
         },
       });
@@ -142,12 +185,17 @@ export async function POST(request: NextRequest) {
 
     console.log('Final extracted audio URL:', audioUrl);
 
-    // Optionally save generation to database for tracking
-    if (validatedData.userId && voiceDbRecord) {
-      try {
+    // Save generation to database and create Audio record
+    try {
+      // Generate filename
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `generated-${timestamp}.${validatedData.audioFormat}`;
+
+      // Save to VoiceGeneration table for tracking
+      if (voiceDbRecord) {
         await prisma.voiceGeneration.create({
           data: {
-            userId: validatedData.userId,
+            userId: userId,
             voiceId: voiceDbRecord.id,
             text: validatedData.text,
             audioUrl: audioUrl,
@@ -159,16 +207,51 @@ export async function POST(request: NextRequest) {
             completedAt: new Date(),
           },
         });
-      } catch (dbError) {
-        console.error('Failed to save generation to database:', dbError);
-        // Don't fail the request if DB save fails
       }
+
+      // Create Audio record in library
+      const audioRecord = await prisma.audio.create({
+        data: {
+          userId: userId,
+          filename: filename,
+          audioUrl: audioUrl,
+          format: validatedData.audioFormat,
+          text: validatedData.text,
+          voiceId: voiceDbRecord?.id,
+          uploadSource: 'generate',
+          status: 'ready',
+          metadata: {
+            model: MINIMAX_SPEECH_MODEL,
+            version: MINIMAX_VERSION,
+            emotion: validatedData.emotion,
+            speed: validatedData.speed,
+            pitch: validatedData.pitch,
+            volume: validatedData.volume,
+            sampleRate: validatedData.sampleRate,
+            characterCount: validatedData.text.length,
+          },
+        },
+      });
+
+      console.log('Audio saved to library:', audioRecord.id);
+
+      // Revalidate pages to show new audio
+      revalidatePath('/dashboard/audios');
+      revalidatePath('/dashboard');
+
+    } catch (dbError) {
+      console.error('Failed to save to database:', dbError);
+      // Don't fail the request if DB save fails, but log it
     }
 
-    // Return the audio URL
+    // Return the audio URL and credit info
     return NextResponse.json({
       success: true,
       audioUrl: audioUrl,
+      credits: {
+        charged: CREDIT_COSTS.VOICE_GENERATION,
+        newBalance: creditResult.newBalance,
+      },
       metadata: {
         characterCount: validatedData.text.length,
         model: MINIMAX_SPEECH_MODEL,
@@ -189,6 +272,23 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Voice generation error:', error);
+
+    // Try to refund credits if generation failed after deduction
+    try {
+      const userId = await requireAuth();
+      await refundCredits(
+        userId,
+        CREDIT_COSTS.VOICE_GENERATION,
+        'Voice generation failed',
+        {
+          error: error.message,
+        }
+      );
+      console.log('Credits refunded due to generation failure');
+    } catch (refundError) {
+      console.error('Failed to refund credits:', refundError);
+      // Continue with error handling even if refund fails
+    }
 
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {

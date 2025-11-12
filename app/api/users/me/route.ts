@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/get-current-user'
 
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Get from session once auth is implemented
-    const userId = 'temp-user-id'
+    // Get authenticated user ID
+    const userId = await requireAuth()
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

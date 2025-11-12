@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Zod validation schema for voice ID parameter
 const VoiceIdSchema = z.string().min(1, "Voice ID is required");
 
-// Zod validation schema for userId in body
-const DeleteVoiceSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
+// Zod validation schema for update
+const UpdateVoiceSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.string().optional(),
+  isPublic: z.boolean().optional(),
+  language: z.string().optional(),
+  gender: z.enum(["male", "female", "neutral"]).optional(),
+  ageGroup: z.enum(["child", "young adult", "adult", "senior"]).optional(),
+  style: z.string().optional(),
 });
 
 export async function GET(
@@ -21,14 +28,8 @@ export async function GET(
     // Validate voice ID
     const voiceId = VoiceIdSchema.parse(id);
 
-    // Get userId from query params
-    const userId = request.nextUrl.searchParams.get('userId');
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Fetch voice from database
     const voice = await prisma.voice.findFirst({
@@ -113,9 +114,8 @@ export async function DELETE(
     // Validate voice ID
     const voiceId = VoiceIdSchema.parse(id);
 
-    // Parse and validate request body
-    const body = await request.json();
-    const { userId } = DeleteVoiceSchema.parse(body);
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Check if voice exists and belongs to user
     const voice = await prisma.voice.findFirst({
@@ -201,23 +201,12 @@ export async function PATCH(
     // Validate voice ID
     const voiceId = VoiceIdSchema.parse(id);
 
+    // Get authenticated user ID
+    const userId = await requireAuth();
+
     // Parse request body
     const body = await request.json();
-
-    // Validation schema for update
-    const UpdateVoiceSchema = z.object({
-      userId: z.string().min(1, "User ID is required"),
-      name: z.string().min(1).max(255).optional(),
-      description: z.string().optional(),
-      isPublic: z.boolean().optional(),
-      language: z.string().optional(),
-      gender: z.enum(["male", "female", "neutral"]).optional(),
-      ageGroup: z.enum(["child", "young adult", "adult", "senior"]).optional(),
-      style: z.string().optional(),
-    });
-
-    const validatedData = UpdateVoiceSchema.parse(body);
-    const { userId, ...updateData } = validatedData;
+    const updateData = UpdateVoiceSchema.parse(body);
 
     // Check if voice exists and belongs to user
     const existingVoice = await prisma.voice.findFirst({

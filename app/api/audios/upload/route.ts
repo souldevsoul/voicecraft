@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { put } from '@vercel/blob';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schema for upload metadata
 const UploadMetadataSchema = z.object({
@@ -12,8 +14,8 @@ const UploadMetadataSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get form data
     const formData = await request.formData();
@@ -102,6 +104,10 @@ export async function POST(request: NextRequest) {
         status: 'ready',
       },
     });
+
+    // Revalidate the audios page to show the new upload
+    revalidatePath('/dashboard/audios');
+    revalidatePath('/dashboard');
 
     return NextResponse.json({
       success: true,

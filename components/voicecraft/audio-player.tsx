@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Card } from "@/components/ui/card"
-import { ActionIcon, Slider, Group, Stack, Text, Transition } from "@mantine/core"
+import { ActionIcon, Slider, Group, Stack, Text } from "@mantine/core"
 import { cn } from "@/lib/utils"
 import { Play, Pause, Download, Volume2, VolumeX } from "lucide-react"
 
@@ -113,16 +113,11 @@ const AudioPlayer = React.forwardRef<HTMLDivElement, AudioPlayerProps>(
             onClick={togglePlay}
             className="flex-shrink-0 shadow-lg hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300"
           >
-            <Transition mounted={isPlaying} transition="rotate-right" duration={200}>
-              {(styles) => (
-                <Pause style={styles} size={28} />
-              )}
-            </Transition>
-            <Transition mounted={!isPlaying} transition="rotate-right" duration={200}>
-              {(styles) => (
-                <Play style={{ ...styles, marginLeft: 2 }} size={28} />
-              )}
-            </Transition>
+            {isPlaying ? (
+              <Pause size={28} />
+            ) : (
+              <Play style={{ marginLeft: 2 }} size={28} />
+            )}
           </ActionIcon>
 
           {/* Info & Progress */}
@@ -191,20 +186,18 @@ const AudioPlayer = React.forwardRef<HTMLDivElement, AudioPlayerProps>(
             </ActionIcon>
 
             {/* Volume Slider - Only show on hover */}
-            <Transition mounted={isHovering} transition="fade" duration={200}>
-              {(styles) => (
-                <div style={{ ...styles, width: 80 }}>
-                  <Slider
-                    value={volume}
-                    onChange={setVolume}
-                    size="xs"
-                    color={colorMap[waveformColor]}
-                    min={0}
-                    max={100}
-                  />
-                </div>
-              )}
-            </Transition>
+            {isHovering && (
+              <div style={{ width: 80 }} className="transition-opacity duration-200">
+                <Slider
+                  value={volume}
+                  onChange={setVolume}
+                  size="xs"
+                  color={colorMap[waveformColor]}
+                  min={0}
+                  max={100}
+                />
+              </div>
+            )}
 
             {showDownload && audioUrl && (
               <ActionIcon

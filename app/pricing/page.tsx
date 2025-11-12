@@ -37,7 +37,7 @@ export default function PricingPage() {
         { text: "Priority support", included: false },
       ],
       cta: "Start Free",
-      ctaHref: "/signup",
+      ctaHref: "/auth/signup",
     },
     {
       name: "Pro",
@@ -57,8 +57,8 @@ export default function PricingPage() {
         { text: "Priority email support", included: true },
         { text: "Usage analytics", included: true },
       ],
-      cta: "Start Free Trial",
-      ctaHref: "/signup?plan=pro",
+      cta: "Start 14-Day Free Trial",
+      ctaHref: "/auth/signup?plan=pro",
     },
     {
       name: "Enterprise",
@@ -523,9 +523,9 @@ export default function PricingPage() {
                 className="gap-3 bg-yellow-400 text-black border-4 border-black font-bold uppercase brutalist-shadow"
                 asChild
               >
-                <a href="/signup">
+                <a href="/auth/signup?plan=pro">
                   <RiArrowRightLine className="w-5 h-5" />
-                  Start Free Trial
+                  Start 14-Day Free Trial
                 </a>
               </Button>
               <Button

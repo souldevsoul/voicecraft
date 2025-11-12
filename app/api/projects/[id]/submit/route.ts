@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schemas
 const ProjectIdSchema = z.string().cuid();
@@ -26,9 +27,8 @@ export async function POST(
     const body = await request.json();
     const { audioIds, notes } = SubmitWorkSchema.parse(body);
 
-    // TODO: Get expertId from session (for now using temp ID)
-    // In a real implementation, this would come from the authenticated expert user
-    const expertUserId = 'temp-user-id';
+    // Get authenticated expert user ID
+    const expertUserId = await requireAuth();
 
     // Get project to verify expert assignment
     const project = await prisma.project.findUnique({

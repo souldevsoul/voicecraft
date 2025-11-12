@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schema
 const ProjectIdSchema = z.string().cuid();
@@ -18,8 +19,8 @@ export async function POST(
     // Validate project ID
     const projectId = ProjectIdSchema.parse(id);
 
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get project with user
     const project = await prisma.project.findFirst({

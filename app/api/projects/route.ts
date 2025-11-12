@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schema for create project
 const CreateProjectSchema = z.object({
@@ -25,8 +26,8 @@ const ListProjectsQuerySchema = z.object({
 // POST /api/projects - Create new project
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Parse and validate request body
     const body = await request.json();
@@ -116,8 +117,8 @@ export async function POST(request: NextRequest) {
 // GET /api/projects - List projects
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Get userId from session (for now using a placeholder)
-    const userId = 'temp-user-id';
+    // Get authenticated user ID
+    const userId = await requireAuth();
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -183,11 +184,18 @@ export async function GET(request: NextRequest) {
           },
         },
         projectAudios: {
-          select: {
-            id: true,
-            audioId: true,
-            order: true,
-            status: true,
+          include: {
+            audio: {
+              select: {
+                id: true,
+                filename: true,
+                duration: true,
+                audioUrl: true,
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
           },
         },
         _count: {

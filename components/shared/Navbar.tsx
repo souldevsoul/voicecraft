@@ -3,6 +3,7 @@
 import * as React from "react"
 import { RiMic2Fill } from "react-icons/ri"
 import { Menu, X } from "lucide-react"
+import { UserButton } from "@/components/auth/user-button"
 
 /**
  * Unified Navbar Component
@@ -70,14 +71,9 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
+          {/* User Button / Auth */}
           <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              className="bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-black font-bold uppercase px-6 py-2 transition-colors"
-            >
-              Get Started
-            </button>
+            <UserButton />
           </div>
 
           {/* Mobile Menu Button */}
@@ -108,15 +104,9 @@ export function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <button
-                className="bg-yellow-400 text-black hover:bg-yellow-300 border-4 border-black font-bold uppercase px-6 py-3 transition-colors w-full"
-                onClick={() => {
-                  window.location.href = '/dashboard'
-                  setMobileMenuOpen(false)
-                }}
-              >
-                Get Started
-              </button>
+              <div className="pt-2">
+                <UserButton />
+              </div>
             </div>
           </div>
         )}

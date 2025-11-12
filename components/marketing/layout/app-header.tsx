@@ -80,6 +80,11 @@ export function AppHeader({ user }: AppHeaderProps) {
                   Projects
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/subscription" className="cursor-pointer">
+                  Subscription
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-black" />
               <DropdownMenuItem disabled>
                 <RiCoinLine className="mr-2 h-4 w-4" />

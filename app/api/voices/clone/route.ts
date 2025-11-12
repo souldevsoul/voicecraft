@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import Replicate from 'replicate';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/get-current-user';
+import {
+  hasEnoughCredits,
+  deductVoiceCloningCredits,
+  refundCredits,
+  CREDIT_COSTS
+} from '@/lib/credits';
 
 // Initialize Replicate client
 const replicate = new Replicate({
@@ -14,7 +22,6 @@ const MINIMAX_CLONING_VERSION = "fff8a670880f066d3742838515a88f7f0a3ae40a4f2e06d
 
 // Zod validation schema for voice cloning request
 const CloneVoiceSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
   name: z.string().min(1, "Voice name is required").max(255, "Voice name too long"),
   description: z.string().optional(),
   audioFileUrl: z.string().url("Valid audio file URL is required"),
@@ -30,9 +37,25 @@ const CloneVoiceSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user ID
+    const userId = await requireAuth();
+
     // Parse and validate request body
     const body = await request.json();
     const validatedData = CloneVoiceSchema.parse(body);
+
+    // Check if user has enough credits
+    const hasCredits = await hasEnoughCredits(userId, CREDIT_COSTS.VOICE_CLONING);
+    if (!hasCredits) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient credits',
+          details: `Voice cloning requires ${CREDIT_COSTS.VOICE_CLONING} credits. Please purchase more credits.`,
+          required: CREDIT_COSTS.VOICE_CLONING,
+        },
+        { status: 402 } // 402 Payment Required
+      );
+    }
 
     // Validate API token
     if (!process.env.REPLICATE_API_TOKEN) {
@@ -44,16 +67,37 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Starting voice cloning:', {
-      userId: validatedData.userId,
+      userId,
       name: validatedData.name,
       audioUrl: validatedData.audioFileUrl,
       model: validatedData.model,
     });
 
+    // Deduct credits before processing
+    let creditResult;
+    try {
+      creditResult = await deductVoiceCloningCredits(
+        userId,
+        validatedData.name,
+        {
+          model: validatedData.model,
+          audioFileUrl: validatedData.audioFileUrl,
+        }
+      );
+    } catch (error: any) {
+      return NextResponse.json(
+        {
+          error: 'Failed to deduct credits',
+          details: error.message,
+        },
+        { status: 402 }
+      );
+    }
+
     // Create voice record in database with "processing" status
     const voice = await prisma.voice.create({
       data: {
-        userId: validatedData.userId,
+        userId,
         name: validatedData.name,
         description: validatedData.description,
         language: validatedData.language,
@@ -98,6 +142,10 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Revalidate the voices page to show the new voice
+      revalidatePath('/dashboard/voices');
+      revalidatePath('/dashboard');
+
       return NextResponse.json({
         success: true,
         voice: {
@@ -109,6 +157,10 @@ export async function POST(request: NextRequest) {
           model: updatedVoice.model,
           sampleAudioUrl: updatedVoice.sampleAudioUrl,
           createdAt: updatedVoice.createdAt,
+        },
+        credits: {
+          charged: CREDIT_COSTS.VOICE_CLONING,
+          newBalance: creditResult.newBalance,
         },
         metadata: {
           model: MINIMAX_VOICE_CLONING_MODEL,
@@ -129,6 +181,23 @@ export async function POST(request: NextRequest) {
           status: 'failed',
         },
       });
+
+      // Refund credits since cloning failed
+      try {
+        await refundCredits(
+          userId,
+          CREDIT_COSTS.VOICE_CLONING,
+          `Voice cloning failed: ${validatedData.name}`,
+          {
+            voiceId: voice.id,
+            error: cloneError.message,
+          }
+        );
+        console.log('Credits refunded due to cloning failure');
+      } catch (refundError) {
+        console.error('Failed to refund credits:', refundError);
+        // Continue with error handling even if refund fails
+      }
 
       throw cloneError;
     }

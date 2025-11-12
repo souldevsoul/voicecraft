@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { requireAuth } from '@/lib/get-current-user';
 
 // Validation schemas
 const ProjectIdSchema = z.string().cuid();
@@ -28,8 +29,10 @@ export async function POST(
     const body = await request.json();
     const { reason, refundAmount, adminNotes } = RefundSchema.parse(body);
 
-    // TODO: Check if user is admin (for now, allowing anyone)
-    // In production, verify admin role from session
+    // Get authenticated user ID and verify admin permissions
+    const userId = await requireAuth();
+    // TODO: Check if user is admin
+    // In production, verify admin role from session (e.g., check user.role === 'admin')
 
     // Get project
     const project = await prisma.project.findUnique({
